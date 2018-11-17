@@ -1,0 +1,3 @@
+*.txt
+sftp-config.json
+application/database.php
