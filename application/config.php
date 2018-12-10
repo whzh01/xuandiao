@@ -1,7 +1,14 @@
 <?php
 
 return [
-
+    //模板参数替换
+    'view_replace_str' => array(
+        '__CSS__' => '/static/admin/css',
+        '__JS__'  => '/static/admin/js',
+        '__IMG__' => '/static/admin/images',
+        '__LAY_CSS__' => '/layui/css',
+        '__LAY_JS__' => '/layui',       
+    ),
     // +----------------------------------------------------------------------
     // | auth配置
     // +----------------------------------------------------------------------
@@ -30,7 +37,7 @@ return [
     'sql_explain' => false,     // 是否需要进行SQL性能分析  
     'extra_config_list' => ['database', 'route', 'validate'],//各模块公用配置
     'app_debug' => true,
-	'default_module' => 'admin',//默认模块	
+	'default_module' => 'home',//默认模块	
     //'default_filter' => ['strip_tags', 'htmlspecialchars'],
 
     //默认错误跳转对应的模板文件

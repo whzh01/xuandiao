@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>选调生进度管理</title>
+  <link rel="stylesheet" href="__LAY_CSS__/layui.css"  media="all">
+  <style>
+    body{margin: 10px;}
+    .demo-carousel{height: 200px; line-height: 200px; text-align: center;}
+  </style>
+</head>
+<body>
+<div class="layui-form layui-form-pane" id="searchForm" >
+  <div class="layui-form-item">
+    <div class="layui-inline">
+      <div class="layui-input-inline" style="width: 150px;">
+        <input type="text" name="stuid" id="stuid" placeholder="学号" autocomplete="off" class="layui-input">
+      </div> 
+    </div>
+    <div class="layui-inline">
+      <div class="layui-input-inline" style="width: 150px;">
+        <input type="text" name="name" id="name" placeholder="姓名" autocomplete="off" class="layui-input">
+      </div> 
+    </div>
+    <div class="layui-inline">
+        <div class="layui-input-inline" style="width: 200px;">
+          <select name="profession" id="profession" lay-filter="profession" lay-verify="" lay-search>
+            <option value="">请选择专业</option>
+            <option value="010">layer</option>
+            <option value="021">form</option>
+            <option value="0571">layim</option>
+          </select>   
+        </div>          
+    </div>  
+    <div class="layui-inline">
+        <button class="layui-btn"  data-type="reload" id="searchBtn" >查询</button>  
+    </div>   
+  </div>
+</div>
+<script type="text/html" id="headTools">
+
+  <div class="layui-form-item">
+    <div class="layui-inline">
+      <div class="layui-input-inline" style="width: 200px;">
+        <select name="processName" id="processName" lay-verify="" lay-search>
+          <option value="">请选择进度</option>
+          <option value="lc_bm">提交</option>
+          <option value="lc_yj">邮寄</option>
+          <option value="lc_zs">政审</option>
+          <option value="lc_bs">笔试</option>
+          <option value="lc_ms">面试</option>
+          <option value="lc_lq">录取</option>
+          <option value="lc_yl">协议</option>
+        </select>   
+    </div>          
+  </div> 
+  <div class="layui-inline">
+      <button class="layui-btn"  id="editProcessBtn" lay-event="editProcess">批量修改进度</button>  
+  </div>      
+</script>
+
+<table class="layui-hide" id="stuJinduTable" lay-filter="test"></table>
+<script src="__LAY_JS__/layui.js"></script>
+<script src="__JS__/jquery.min.js"></script>
+<script>
+
+layui.use(['laydate', 'laypage', 'layer', 'table', 'element', 'slider'], function(){
+  var laydate = layui.laydate //日期
+  ,laypage = layui.laypage //分页
+  ,layer = layui.layer //弹层
+  ,table = layui.table //表格
+  ,element = layui.element //元素操作
+  ,slider = layui.slider //滑块
+  
+ 
+  
+  //执行一个 table 实例
+  var stuJinduTable = table.render({
+    elem: '#stuJinduTable'
+    ,height: 420
+    ,url: '/admin/xuandiao/index' //数据接口
+    ,title: '用户表'
+    ,page: true //开启分页
+    ,toolbar: '#headTools' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+    ,height: 580
+    ,cols: [[ //表头
+      {type: 'checkbox', fixed: 'left'}
+      ,{field: 'stuid', title: '学号', width:"15%", sort: true}
+      ,{field: 'name', title: '姓名', width:"10%"}
+      ,{field: 'bmsf', title: '报考省份', width:"10%"} 
+      ,{field: 'lc_bm', title: '报名', width:"10%" }
+      ,{field: 'lc_yj', title: '邮寄', width:"5%"}
+      ,{field: 'lc_zs', title: '政审', width: "5%"}
+      ,{field: 'lc_bs', title: '笔试', width: "5%"}
+      ,{field: 'lc_ms', title: '面试', width: "5%"}
+      ,{field: 'lc_lq', title: '录取', width: "5%"}
+      ,{field: 'lc_yl', title: '协议', width: "5%"}
+      ,{field: 'remark', title: '其他备注', width: "10%"}
+      ,{field: 'id', title: '', style:'display:none'}
+      
+    ]]
+    ,id:'stuJinduTable'
+  });
+  
+  //监听头工具栏事件
+  table.on('toolbar(test)', function(obj){
+    var checkStatus = table.checkStatus(obj.config.id)
+    ,data = checkStatus.data; //获取选中的数据
+    switch(obj.event){
+      case 'update':
+        if(data.length === 0){
+          layer.msg('请选择一行');
+        } else if(data.length > 1){
+          layer.msg('只能同时编辑一个');
+        } else {
+          layer.alert('编辑 [id]：'+ checkStatus.data[0].id);
+        }
+        break;
+      case 'editProcess':
+          var uid = '';
+          if(data.length === 0){
+            layer.msg('请选择一行');
+          } else if(data.length > 1){
+            layer.msg('暂时无法批量修改，请选择一行');
+          }else{
+          //  console.log(data);
+            var delList = new Array();
+  
+            data.forEach(function(n,i){
+                delList.push(n.id);  
+                uid += n.stuid + ',';
+            });
+            var alterProcessName = $("#processName option:selected").val();//**获取当前修改的进度名称*/
+            var param = {
+              "id":delList,
+              "suid": uid,
+              "processName": alterProcessName,
+            }
+            layer.confirm('确定修改id='+uid, function(index){
+                $.ajax({
+                       url: '/admin/xuandiao/jinduAlter',
+                       type:'post',
+                       dataType:'json',
+                       data: param,
+                       success:function (data,statusText) {
+                           if(data.code===0){
+                               layer.msg('进度修改成功');
+                               table.reload('stuJinduTable',{});
+                           }else{
+                               layer.msg('进度修改失败');
+                           }
+                       },
+                       'error':function () {
+                           layer.msg('系统错误');
+                       }
+                });
+                layer.close(index);
+            });
+          }
+        break;
+    };
+  });
+  
+    /**查询搜索*/
+   $("#searchBtn").click(function(){
+      //执行重载
+    //  layer.msg("reload");
+      stuJinduTable.reload({
+          where: {
+            stuid: $("#stuid").val(),
+            name: $("#name").val(),
+            profession: $("#profession").val(),
+          }
+        ,page: {
+          curr: 1 //重新从第 1 页开始
+        }
+        
+      });
+  });
+  
+  //分页
+  laypage.render({
+    elem: 'pageDemo' //分页容器的id
+    ,count: 100 //总页数
+    ,skin: '#1E9FFF' //自定义选中色值
+    //,skip: true //开启跳页
+    ,jump: function(obj, first){
+      if(!first){
+        layer.msg('第'+ obj.curr +'页', {offset: 'b'});
+      }
+    }
+  });
+  
+
+  slider.render({
+    elem: '#sliderDemo'
+    ,input: true //输入框
+  });
+  
+
+});
+</script>
+</body>
+</html>        
+        

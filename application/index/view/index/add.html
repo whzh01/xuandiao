@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>选调生信息登记</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="__LAY_CSS__/layui.css"  media="all">
+  <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+  <h1 style="text-align:center;">选调生信息登记</h1>
+  <form class="layui-form" id="formadd" lay-filter="formadd" action="/index/error" method="post">
+
+  <div class="layui-form-item">
+    <label class="layui-form-label">学号</label>
+    <div class="layui-input-block">
+      <input type="text" name="stuid" lay-verify="required" autocomplete="off" placeholder="请输入标题" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">姓名</label>
+    <div class="layui-input-block">
+      <input type="text" name="name" lay-verify="required" autocomplete="off" placeholder="请输入标题" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">性别</label>
+    <div class="layui-input-block">
+      <input type="radio" name="sex" value="男" title="男" checked="">
+      <input type="radio" name="sex" value="女" title="女">
+      <input type="radio" name="sex" value="禁" title="禁用" disabled="">
+    </div>
+  </div>
+ 
+  <div class="layui-form-item">
+    <label class="layui-form-label">专业</label>
+    <div class="layui-input-block">
+      <input type="text" name="profession" lay-verify="required" autocomplete="off" placeholder="请输入标题" class="layui-input">
+    </div>
+  </div>
+
+  <div class="layui-form-item">
+    <label class="layui-form-label">学历</label>
+    <div class="layui-input-block">
+      <select name="education" lay-filter="aihao">
+        <option value="本科">本科</option>
+        <option value="硕士研究生" selected="">硕士研究生</option>
+        <option value="博士研究生">博士研究生</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+    <label class="layui-form-label">报名省份</label>
+    <div class="layui-input-block">
+      <select name="bmsf" lay-search>
+        {volist name="province" id="po"}
+            <option value="{$po}">{$po}</option>
+        {/volist}
+      </select>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">电话</label>
+    <div class="layui-input-block">
+      <input type="text" name="phone" lay-verify="required|phone" autocomplete="off" placeholder="请输入标题" class="layui-input">
+    </div>
+  </div>
+ <div class="layui-form-item">
+    <button class="layui-btn"  lay-submit="" id="formaddBtn" lay-filter="formadd">提交</button>
+  </div>
+</form>
+          
+<script src="__LAY_JS__/layui.js" charset="utf-8"></script>
+<script src="__JS__/jquery.min.js"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+function CloseWebPage() {
+    //判断是否为ie
+    if (navigator.userAgent.indexOf("MSIE") > 0) {
+        //判断是否为ie6
+        if (navigator.userAgent.indexOf("MSIE 6.0") > 0) {
+            window.opener = null; window.close();
+        }
+        else {
+            window.open('', '_top'); window.top.close();
+        }
+    }
+    //判断是否为firefox
+    else if (navigator.userAgent.indexOf("Firefox") > 0) {
+        window.location.href = 'about:blank ';
+    }
+    //其他非firefox等主流浏览器如chrome,safari
+    else {
+        window.opener = null; 
+        window.open('', '_self', '');
+        window.close();
+    }
+}
+layui.use(['form', 'layedit', 'laydate'], function(){
+  var form = layui.form
+  ,layer = layui.layer
+  ,layedit = layui.layedit;
+
+   /**监听提交事件*/
+  form.on('submit(formadd)', function(data){
+    console.log(data);
+    $.post("/index/index",data.field,function(res){
+      if(res.code === 0){
+          layer.msg(res.msg, {icon:1,time: 1500
+            },function()
+            {
+                 var url = "/home/"; 
+                 setTimeout(window.location.href=url,2000);         
+          });
+          
+        }else{
+          layer.msg(res.msg, {time: 2000});
+      }
+    },'json');
+    return false;
+  });
+
+
+});
+</script>
+
+</body>
+</html>
